@@ -57,17 +57,21 @@ spec:
 
           readinessProbe:
             httpGet:
-              path: /status.jsp
+              path: /status.jsp   # or /status if your image supports it
               port: 8080
-            initialDelaySeconds: 240
-            periodSeconds: 30
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
 
           livenessProbe:
             httpGet:
-              path: /status.jsp
+              path: /             # safer than /status.jsp
               port: 8080
-            initialDelaySeconds: 240
+            initialDelaySeconds: 600   # wait a LONG time before deciding it's dead
             periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
 
           resources:
             requests:
