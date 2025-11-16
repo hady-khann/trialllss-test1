@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jira
+  namespace: jira
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jira
+  template:
+    metadata:
+      labels:
+        app: jira
+    spec:
+      containers:
+        - name: jira
+          image: docker.io/trialllss/test1:v1
+          ports:
+            - containerPort: 8080
+          env:
+            # Database
+            - name: ATL_JDBC_URL
+              value: "jdbc:postgresql://jira-postgres:5432/jiradb"
+            - name: ATL_JDBC_USER
+              valueFrom:
+                secretKeyRef:
+                  name: jira-db-secret
+                  key: POSTGRES_USER
+            - name: ATL_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jira-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: ATL_DB_TYPE
+              value: "postgresql"
+
+            # Proxy
+            - name: ATL_TOMCAT_SCHEME
+              value: "http"
+            - name: ATL_TOMCAT_SECURE
+              value: "false"
+            - name: ATL_PROXY_NAME
+              value: "jira-k8s"
+            - name: ATL_PROXY_PORT
+              value: "30080"
+
+            # JVM
+            - name: JVM_MINIMUM_MEMORY
+              value: "1024m"
+            - name: JVM_MAXIMUM_MEMORY
+              value: "1024m"
+
+          volumeMounts:
+            - name: jira-data
+              mountPath: /var/atlassian/application-data/jira
+
+          readinessProbe:
+            httpGet:
+              path: /status.jsp
+              port: 8080
+            initialDelaySeconds: 240
+            periodSeconds: 30
+
+          livenessProbe:
+            httpGet:
+              path: /status.jsp
+              port: 8080
+            initialDelaySeconds: 240
+            periodSeconds: 30
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+
+      volumes:
+        - name: jira-data
+          persistentVolumeClaim:
+            claimName: jira-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jira
+  namespace: jira
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: jira
