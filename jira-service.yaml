@@ -47,9 +47,10 @@ spec:
 
             # JVM
             - name: JVM_MINIMUM_MEMORY
-              value: "1024m"
+              value: "512m"
             - name: JVM_MAXIMUM_MEMORY
-              value: "1024m"
+              value: "512m"
+
 
           volumeMounts:
             - name: jira-data
@@ -57,11 +58,12 @@ spec:
 
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "300m"
+              memory: "512Mi"
             limits:
               cpu: "1"
-              memory: "2Gi"
+              memory: "768Mi"
+
 
       volumes:
         - name: jira-data
