@@ -46,26 +46,6 @@ spec:
             - name: ATL_PROXY_PORT
               value: "30080"
 
-            # ✔ Full offline mode
-            - name: ATL_PLUGIN_MANAGER_DISABLE_REMOTE_PLUGIN_UPDATES
-              value: "true"
-            - name: UPM_ENABLE_MARKETPLACE
-              value: "false"
-            - name: UPM_DISABLE_RSS
-              value: "true"
-            - name: DISABLE_EXTERNAL_AVATARS
-              value: "true"
-            - name: ATL_TELEMETRY_ENABLED
-              value: "false"
-            - name: ATL_TUNNEL_SERVICE
-              value: "disabled"
-            - name: DISABLE_NOTIFICATIONS
-              value: "true"
-            - name: ATL_MAIL_DISABLED
-              value: "true"
-            - name: ATL_UPM_DISABLE_VERIFICATION
-              value: "true"
-
             # ✔ JVM
             - name: JVM_MINIMUM_MEMORY
               value: "2048m"
