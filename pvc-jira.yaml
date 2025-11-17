@@ -22,3 +22,5 @@ spec:
     requests:
       storage: 10Gi
   volumeName: jira-pv
+  storageClassName: ""
+
