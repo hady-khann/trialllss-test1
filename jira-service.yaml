@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: jira
-          image: docker.io/atlassian/jira-software:latest
+          image: docker.io/trialllss/test1:v1
           ports:
             - containerPort: 8080
           env:
