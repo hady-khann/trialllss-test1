@@ -47,9 +47,9 @@ spec:
 
             # JVM
             - name: JVM_MINIMUM_MEMORY
-              value: "768m"
+              value: "2048m"
             - name: JVM_MAXIMUM_MEMORY
-              value: "768m"
+              value: "2048m"
 
 
           volumeMounts:
@@ -58,11 +58,11 @@ spec:
 
           resources:
             requests:
-              cpu: "512m"
-              memory: "1000Mi"
+              cpu: "500m"
+              memory: "2Gi"
             limits:
-              cpu: "1000"
-              memory: "1Gi"
+              cpu: "1"
+              memory: "3Gi"
 
 
 
