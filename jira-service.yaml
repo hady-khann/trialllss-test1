@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: jira
-          image: docker.io/trialllss/test10:v10
+          image: docker.io/trialllss/test11:v11
           ports:
             - containerPort: 8080
           env:
