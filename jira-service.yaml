@@ -1,4 +1,3 @@
-# ✔ Correct Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,53 +19,67 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            # ✔ Database
+            # Database
             - name: ATL_JDBC_URL
               value: "jdbc:postgresql://jira-postgres:5432/jiradb"
+
             - name: ATL_JDBC_USER
               valueFrom:
                 secretKeyRef:
                   name: jira-db-secret
                   key: POSTGRES_USER
+
             - name: ATL_JDBC_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: jira-db-secret
                   key: POSTGRES_PASSWORD
+
             - name: ATL_DB_TYPE
               value: "postgresql"
 
-            # ✔ Reverse Proxy
+            # ✔ Correct Reverse Proxy for Ingress
             - name: ATL_TOMCAT_SCHEME
               value: "http"
+
             - name: ATL_TOMCAT_SECURE
               value: "false"
+
             - name: ATL_PROXY_NAME
               value: "jira.middleweb.ir"
-            - name: ATL_PROXY_PORT
-              value: "80"
 
-            # ✔ Full offline mode
+            - name: ATL_PROXY_PORT
+              value: "80"     # <-- FIXED
+
+            # Other settings
             - name: ATL_PLUGIN_MANAGER_DISABLE_REMOTE_PLUGIN_UPDATES
               value: "true"
+
             - name: UPM_ENABLE_MARKETPLACE
               value: "false"
+
             - name: UPM_DISABLE_RSS
               value: "true"
+
             - name: DISABLE_EXTERNAL_AVATARS
               value: "true"
+
             - name: ATL_TELEMETRY_ENABLED
               value: "false"
+
             - name: ATL_TUNNEL_SERVICE
               value: "disabled"
+
             - name: ATL_MAIL_DISABLED
               value: "true"
+
             - name: ATL_UPM_DISABLE_VERIFICATION
               value: "true"
 
-            # ✔ JVM
+            # JVM
             - name: JVM_MINIMUM_MEMORY
               value: "2048m"
+
             - name: JVM_MAXIMUM_MEMORY
               value: "2048m"
 
@@ -81,7 +94,7 @@ spec:
             limits:
               cpu: "1500m"
               memory: "3Gi"
-
+              
       volumes:
         - name: jira-data
           persistentVolumeClaim:
