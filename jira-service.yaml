@@ -82,7 +82,7 @@ spec:
               memory: "2Gi"
             limits:
               cpu: "500m"
-              memory: "3Gi"
+              memory: "2Gi"
 
       volumes:
         - name: jira-data
