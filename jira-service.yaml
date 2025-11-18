@@ -59,10 +59,10 @@ spec:
               value: "false"
             - name: ATL_TUNNEL_SERVICE
               value: "disabled"
-            #- name: DISABLE_NOTIFICATIONS
-            #  value: "true"
-            #- name: ATL_MAIL_DISABLED
-            #  value: "true"
+            - name: DISABLE_NOTIFICATIONS
+              value: "true"
+            - name: ATL_MAIL_DISABLED
+              value: "true"
             #- name: ATL_UPM_DISABLE_VERIFICATION
             #  value: "true"
 
