@@ -49,8 +49,8 @@ spec:
             # ✔ Full offline mode
             - name: ATL_PLUGIN_MANAGER_DISABLE_REMOTE_PLUGIN_UPDATES
               value: "true"
-            #- name: UPM_ENABLE_MARKETPLACE
-            #  value: "false"
+            - name: UPM_ENABLE_MARKETPLACE
+              value: "false"
             #- name: UPM_DISABLE_RSS
             #  value: "true"
             #- name: DISABLE_EXTERNAL_AVATARS
