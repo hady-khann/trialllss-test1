@@ -53,8 +53,8 @@ spec:
               value: "false"
             - name: UPM_DISABLE_RSS
               value: "true"
-            #- name: DISABLE_EXTERNAL_AVATARS
-            #  value: "true"
+            - name: DISABLE_EXTERNAL_AVATARS
+              value: "true"
             #- name: ATL_TELEMETRY_ENABLED
             #  value: "false"
             #- name: ATL_TUNNEL_SERVICE
