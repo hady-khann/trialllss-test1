@@ -4,8 +4,9 @@ metadata:
   name: jira-ingress
   namespace: jira
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
     - host: jira.middleweb.ir
       http:
