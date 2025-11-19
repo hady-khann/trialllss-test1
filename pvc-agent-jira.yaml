@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jira-pvc
+  name: jira-agent-pvc
   namespace: prod-vsc
 spec:
   accessModes:

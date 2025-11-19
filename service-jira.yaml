@@ -1,104 +1,18 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: jira
-  namespace: jira
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: jira
-  template:
-    metadata:
-      labels:
-        app: jira
-    spec:
-      containers:
-        - name: jira
-          image: docker.io/trialllss/test1:v24
-          ports:
-            - containerPort: 8080
-          env:
-            # Database
-            - name: ATL_JDBC_URL
-              value: "jdbc:postgresql://jira-postgres:5432/jiradb"
-
-            - name: ATL_JDBC_USER
-              valueFrom:
-                secretKeyRef:
-                  name: jira-db-secret
-                  key: POSTGRES_USER
-
-            - name: ATL_JDBC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: jira-db-secret
-                  key: POSTGRES_PASSWORD
-
-            - name: ATL_DB_TYPE
-              value: "postgresql"
-
-            # ✔ Correct Reverse Proxy for Ingress
-            - name: ATL_TOMCAT_SCHEME
-              value: "http"
-            - name: ATL_TOMCAT_SECURE
-              value: "false"
-            - name: ATL_PROXY_NAME
-              value: "jira.middleweb.ir"
-            - name: ATL_PROXY_PORT
-              value: "80"
-
-            # Other settings
-            - name: ATL_PLUGIN_MANAGER_DISABLE_REMOTE_PLUGIN_UPDATES
-              value: "true"
-            - name: UPM_ENABLE_MARKETPLACE
-              value: "false"
-            - name: UPM_DISABLE_RSS
-              value: "true"
-            - name: DISABLE_EXTERNAL_AVATARS
-              value: "true"
-            - name: ATL_TELEMETRY_ENABLED
-              value: "false"
-            - name: ATL_TUNNEL_SERVICE
-              value: "disabled"
-            - name: ATL_MAIL_DISABLED
-              value: "true"
-            - name: ATL_UPM_DISABLE_VERIFICATION
-              value: "true"
-
-            # JVM
-            - name: JVM_MINIMUM_MEMORY
-              value: "2048m"
-            - name: JVM_MAXIMUM_MEMORY
-              value: "2048m"
-
-          volumeMounts:
-            - name: jira-data
-              mountPath: /var/atlassian/application-data/jira
-
-          resources:
-            requests:
-              cpu: "500m"
-              memory: "2Gi"
-            limits:
-              cpu: "500m"
-              memory: "2Gi"
-
-      volumes:
-        - name: jira-data
-          persistentVolumeClaim:
-            claimName: jira-data
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: jira
-  namespace: jira
+  name: std-jira
+  namespace: prod-vsc
+  labels:
+    app.kubernetes.io/name: std-jira
+    app.kubernetes.io/env: prod
 spec:
+  selector:
+    app.kubernetes.io/name: std-jira
+    app.kubernetes.io/env: prod
   type: ClusterIP
   ports:
-    - port: 8080
+    - name:  http
+      port: 80
       targetPort: 8080
-  selector:
-    app: jira
 
