@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: std-jira
-  namespace: prod-vsc
+  namespace: prod-jira
   labels:
     app.kubernetes.io/name: std-jira
     app.kubernetes.io/env: prod
@@ -25,114 +25,6 @@ spec:
         app.kubernetes.io/type: app
     spec:
       serviceAccountName: std-jira
-
-      initContainers:
-        - name: copy-setenv
-          image: busybox
-          command:
-            - sh
-            - -c
-            - |
-              echo "Writing original setenv.sh into PVC..."
-
-              cat > /opt/atlassian/jira/bin/setenv.sh <<"EOF"
-              
-              MIN_NOFILES_LIMIT=16384
-              : ${JVM_SUPPORT_RECOMMENDED_ARGS:=""}
-              JVM_GC_ARGS="-XX:+ExplicitGCInvokesConcurrent"
-              : ${JVM_MINIMUM_MEMORY:=384m}
-              : ${JVM_MAXIMUM_MEMORY:=2048m}
-              JVM_CODE_CACHE_ARGS='-XX:InitialCodeCacheSize=32m -XX:ReservedCodeCacheSize=${JVM_RESERVED_CODE_CACHE_SIZE:=512m}'
-              JVM_REQUIRED_ARGS='-Dlog4j2.contextSelector=org.apache.logging.log4j.core.selector.BasicContextSelector -Dlog4j2.disableJmx=true -Dlog4j2.garbagefree.threadContextMap=true -Dlog4j2.isWebapp=false -Djava.awt.headless=true -Datlassian.standalone=JIRA -Dorg.apache.jasper.runtime.BodyContentImpl.LIMIT_BUFFER=true -Dmail.mime.decodeparameters=true -Dorg.dom4j.factory=com.atlassian.core.xml.InterningDocumentFactory -Dorg.apache.catalina.connector.RECYCLE_FACADES=false -Djavax.servlet.request.encoding=UTF8 -Dsun.jnu.encoding=UTF-8 -Dfile.encoding=UTF-8 -Dplugin.webhooks.skip.url.reencoding=true'
-              JVM_EXTRA_ARGS="-XX:-OmitStackTraceInFastThrow -Djava.locale.providers=COMPAT"
-              
-              CURRENT_NOFILES_LIMIT=$( ulimit -Hn )
-              ulimit -Sn $CURRENT_NOFILES_LIMIT
-              ulimit -n $(( CURRENT_NOFILES_LIMIT > MIN_NOFILES_LIMIT  ? CURRENT_NOFILES_LIMIT : MIN_NOFILES_LIMIT ))
-              
-              PRGDIR=`dirname "$0"`
-              cat "${PRGDIR}"/jirabanner.txt
-              
-              JIRA_HOME_MINUSD=""
-              if [ "$JIRA_HOME" != "" ]; then
-                  echo $JIRA_HOME | grep -q " "
-                  if [ $? -eq 0 ]; then
-                          echo ""
-                          echo "--------------------------------------------------------------------------------------------------------------------"
-                              echo "   WARNING : You cannot have a JIRA_HOME environment variable set with spaces in it.  This variable is being ignored"
-                          echo "--------------------------------------------------------------------------------------------------------------------"
-                  else
-                              JIRA_HOME_MINUSD=-Djira.home=$JIRA_HOME
-                  fi
-              fi
-              
-              JAVA_OPTS="${JAVA_OPTS} ${TOMCAT_JVM_OPTS} ${JVM_CODE_CACHE_ARGS} ${JVM_REQUIRED_ARGS} ${DISABLE_NOTIFICATIONS} ${JVM_SUPPORT_RECOMMENDED_ARGS} ${JVM_EXTRA_ARGS} ${JIRA_HOME_MINUSD} ${START_JIRA_JAVA_OPTS}"
-              
-              export JAVA_OPTS
-              
-              CATALINA_OPTS="-Xms${JVM_MINIMUM_MEMORY} -Xmx${JVM_MAXIMUM_MEMORY} ${CATALINA_OPTS}"
-              
-              export CATALINA_OPTS
-              
-              echo ""
-              echo "If you encounter issues starting or stopping Jira, please see the Troubleshooting guide at https://docs.atlassian.com/jira/jadm-docs-112/Troubleshooting+installation"
-              echo ""
-              if [ "$JIRA_HOME_MINUSD" != "" ]; then
-                  echo "Using JIRA_HOME:       $JIRA_HOME"
-              fi
-              
-              if [ -z "$CATALINA_PID" ] ; then
-                  if [ -n "$CATALINA_BASE" ] ; then
-                      CATALINA_PID="$CATALINA_BASE"/work/catalina.pid
-                  elif [ -n "$CATALINA_HOME" ] ; then
-                      CATALINA_PID="$CATALINA_HOME"/work/catalina.pid
-                  fi
-              fi
-              export CATALINA_PID
-              
-              if [ -z "$CATALINA_BASE" ]; then
-                if [ -z "$CATALINA_HOME" ]; then
-                  LOGBASE=$PRGDIR
-                  LOGTAIL=..
-                else
-                  LOGBASE=$CATALINA_HOME
-                  LOGTAIL=.
-                fi
-              else
-                LOGBASE=$CATALINA_BASE
-                LOGTAIL=.
-              fi
-              
-              PUSHED_DIR=`pwd`
-              cd $LOGBASE
-              cd $LOGTAIL
-              LOGBASEABS=`pwd`
-              cd $PUSHED_DIR
-              
-              echo ""
-              echo "Server startup logs are located in $LOGBASEABS/logs/catalina.out"
-              export CATALINA_OPTS="-javaagent:/opt/atlassian/jira/atlassian-agent.jar ${CATALINA_OPTS}"
-
-
-              EOF
-
-              echo "Original setenv.sh written."
-
-              echo "Appending javaagent line..."
-              if ! grep -q "atlassian-agent.jar" /opt/atlassian/jira/bin/setenv.sh; then
-                echo 'export CATALINA_OPTS="-javaagent:/mnt/agent/atlassian-agent.jar ${CATALINA_OPTS}"' >> /opt/atlassian/jira/bin/setenv.sh
-              fi
-
-              echo "Done."
-
-          volumeMounts:
-            - name: host-agent
-              mountPath: /host
-              readOnly: true
-            - name: jira-agent
-              mountPath: /agent
-            - name: jira-install
-              mountPath: /opt/atlassian/jira
 
       containers:
         - name: jira
@@ -178,12 +70,8 @@ spec:
               value: "2048m"
 
           volumeMounts:
-            - name: jira-agent
-              mountPath: /mnt/agent
             - name: jira-data
               mountPath: /var/atlassian/application-data/jira
-            - name: jira-install
-              mountPath: /opt/atlassian/jira
 
           resources:
             requests:
@@ -194,28 +82,7 @@ spec:
               memory: "2Gi"
 
       volumes:
-        # Provides access to the custom agent JAR stored on the host node.
-        # InitContainer reads from this file and copies it into the jira-agent PVC.
-        - name: host-agent
-          hostPath:
-            path: /opt/jira/custom-agent.jar
-            type: File
-
-        # Persistent storage for the agent JAR after it is copied.
-        # Both initContainer and the Jira container use this shared PVC.
-        - name: jira-agent
-          persistentVolumeClaim:
-            claimName: jira-agent-pvc
-
-        # Main Jira application data (attachments, plugins, caches, configs).
-        # Ensures Jira data persists across pod restarts and upgrades.
         - name: jira-data
           persistentVolumeClaim:
             claimName: jira-pvc
-
-        # Shared writable filesystem for the Jira installation directory.
-        # Allows the initContainer to modify setenv.sh and other startup files
-        # before the main Jira container starts (e.g., injecting -javaagent).
-        - name: jira-install
-          emptyDir: {}
 

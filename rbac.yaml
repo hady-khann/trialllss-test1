@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: std-jira:view
-  namespace: prod-vsc
+  namespace: prod-jira
   labels:
     app.kubernetes.io/name: std-jira
     app.kubernetes.io/env: prod
@@ -13,4 +13,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: std-jira
-    namespace: prod-vsc
+    namespace: prod-jira
