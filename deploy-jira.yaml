@@ -62,24 +62,35 @@ spec:
               value: "true"
             - name: ATL_UPM_DISABLE_VERIFICATION
               value: "true"
+            - name: JVM_SUPPORT_RECOMMENDED_ARGS
+              value: >-
+                -Datlassian.marketplace.auto.update.disabled=true
+                -Dplugin.resource.disable.download=true
+                -Datlassian.mail.senddisabled=true
+                -Datlassian.mail.fetchdisabled=true
+                -Datlassian.analytics.disabled=true
+                -Dupm.pac.disable=true
+                -Datlassian.upm.onboarding.skip=true
+                -Datlassian.upm.signature.check.disabled=true
+                -Datlassian.plugins.enable.wait=300
 
             # JVM
             - name: JVM_MINIMUM_MEMORY
-              value: "2048m"
+              value: "3072m"
             - name: JVM_MAXIMUM_MEMORY
-              value: "2048m"
+              value: "3072m"
 
           volumeMounts:
             - name: jira-data
               mountPath: /var/atlassian/application-data/jira
-
+          
           resources:
             requests:
+              memory: "3Gi"
               cpu: "500m"
-              memory: "2Gi"
             limits:
-              cpu: "500m"
-              memory: "2Gi"
+              memory: "4Gi"
+              cpu: "1000m"
 
       volumes:
         - name: jira-data
